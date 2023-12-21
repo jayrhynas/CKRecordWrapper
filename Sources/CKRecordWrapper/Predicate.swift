@@ -84,8 +84,8 @@ public extension CKRecord.TypedSystemFieldKey where Value == CKRecord.ID {
 }
 
 public extension CKRecord.TypedSystemFieldKey where Value == Date {
-    static let creatorUserRecordID = Self.init(key: Self.SystemKey.creationDate)
-    static let modificationDate    = Self.init(key: Self.SystemKey.modificationDate)
+    static let creationDate     = Self.init(key: Self.SystemKey.creationDate)
+    static let modificationDate = Self.init(key: Self.SystemKey.modificationDate)
 }
 
 public extension CKRecord.TypedSystemFieldKey where Value == CKRecord.Reference {
