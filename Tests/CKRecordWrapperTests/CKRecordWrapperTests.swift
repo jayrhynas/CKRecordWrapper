@@ -16,8 +16,8 @@ final class Person: CKRecordWrapper {
     var name: String?
 }
 
-private let userId = CKRecord.ID(recordName: "_4e9be40733e241d8b1a5c38b5e12122d")
-
+let creationDate = Date()
+let creationTimeInterval = creationDate.timeIntervalSinceReferenceDate
 
 final class CKRecordWrapperTests: XCTestCase {
     func testWrap() throws {
@@ -37,33 +37,33 @@ final class CKRecordWrapperTests: XCTestCase {
     }
     
     func testFieldPredicate() throws {
-        let pred: CKPredicate<Person> =
+        let query = Person.query(
             .where(\.$name, equalTo: "Jayson")
-        XCTAssertEqual(pred.predicate.predicateFormat, #"name == "Jayson""#)
+        )
+        XCTAssertEqual(query.predicate.predicateFormat, #"name == "Jayson""#)
     }
     
     func testSystemFieldPredicate() throws {
-        let pred: CKPredicate<Person> = 
-            .where(.creatorUserRecordID, equalTo: userId)
-        XCTAssertEqual(pred.predicate.predicateFormat, "___createdBy == \(userId)")
+        let query = Person.query(
+            .where(.creationDate, equalTo: creationDate)
+        )
+        XCTAssertEqual(query.predicate.predicateFormat, #"___createTime == CAST(\#(creationTimeInterval), "NSDate")"#)
     }
     
     func testCompoundPredicate() throws {
-        let pred: CKPredicate<Person> =
+        let query = Person.query(
             .where(\.$name, equalTo: "Jayson")
-            .and(.where(.creatorUserRecordID, equalTo: userId))
-        
-        XCTAssertEqual(pred.predicate.predicateFormat, #"name == "Jayson" AND ___createdBy == \#(userId)"#)
+            .and(.where(.creationDate, equalTo: creationDate))
+        )
+        XCTAssertEqual(query.predicate.predicateFormat, #"name == "Jayson" AND ___createTime == CAST(\#(creationTimeInterval), "NSDate")"#)
     }
     
     // type inference is lost here, that's probably unavoidable
     func testUnifiedPredicates() throws {
-        let namePred: CKPredicate<Person> =
+        let query = Person.query(
             .where2(\Person.$name, equalTo: "Jayson")
-        XCTAssertEqual(namePred.predicate.predicateFormat, #"name == "Jayson""#)
-        
-        let creatorPred: CKPredicate<Person> =
-            .where2(CKRecord.TypedSystemFieldKey.creatorUserRecordID, equalTo: userId)
-        XCTAssertEqual(creatorPred.predicate.predicateFormat, "___createdBy == \(userId)")
+            .and(.where2(CKRecord.TypedSystemFieldKey.creationDate, equalTo: creationDate))
+        )
+        XCTAssertEqual(query.predicate.predicateFormat, #"name == "Jayson" AND ___createTime == CAST(\#(creationTimeInterval), "NSDate")"#)
     }
 }
