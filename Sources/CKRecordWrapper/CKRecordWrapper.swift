@@ -18,7 +18,7 @@ public extension CKRecordWrapper {
     }
     
     static func key<V>(for keyPath: KeyPath<Self, CKField<V>>) -> String {
-        try! self.init(CKRecord(recordType: self.recordType))[keyPath: keyPath].key
+        self.init()[keyPath: keyPath].key
     }
     
     static func validateRecordType(for record: CKRecord) throws {
@@ -54,7 +54,7 @@ public extension NSSortDescriptor {
 public extension CKRecordWrapper {
     /// Helper to create a query for this record type
     /// - Parameters:
-    ///   - predicate: A `Predicate` to be used for the query. `predicate` will be converted to an `NSPredicate` internally. For more information about allowed predicates, see [Predicate Rules for Query Objects](https://developer.apple.com/documentation/cloudkit/ckquery#1666032)
+    ///   - predicate: A `CKPredicate` to be used for the query. `predicate` will be converted to an `NSPredicate` internally. For more information about allowed predicates, see [Predicate Rules for Query Objects](https://developer.apple.com/documentation/cloudkit/ckquery#1666032)
     ///   - sort: An optional `Array` of `NSSortDescriptors` used to sort the records returned by the query. For more information about allowed sort descriptors, see [CKQuery.sortDescriptors](https://developer.apple.com/documentation/cloudkit/ckquery/1413121-sortdescriptors)
     /// - Returns: A `CKQuery` configured with the given predicate and sort descriptors.
     static func query(_ predicate: CKPredicate<Self>, sort: [NSSortDescriptor]? = nil) -> CKQuery {

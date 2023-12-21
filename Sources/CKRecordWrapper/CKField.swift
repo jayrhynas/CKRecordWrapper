@@ -14,7 +14,6 @@ extension Optional: CKRecordValueProtocol where Wrapped: CKRecordValueProtocol {
 /// - Parameters:
 ///   - wrappedValue: Used as a default value when the specified field does not exist in the record (or exists but is the wrong type)
 ///   - key: The key to look up in the record
-///   - fallback: A fallback key to use if the regular key does not exist in the record
 @propertyWrapper
 public struct CKField<Value: CKRecordValueProtocol> {
     public static subscript<T: CKRecordWrapper>(
