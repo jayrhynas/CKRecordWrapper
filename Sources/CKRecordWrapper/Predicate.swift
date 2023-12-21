@@ -126,3 +126,63 @@ public extension CKPredicate {
         CKPredicate(key, "!=", value)
     }
 }
+
+// MARK: - Attempt at unifying
+
+public protocol StringKeyConvertible<Value> {
+    associatedtype Value
+    var stringKey: String { get }
+}
+
+extension CKRecord.TypedSystemFieldKey: StringKeyConvertible {
+    public var stringKey: String { key }
+}
+
+extension CKField: StringKeyConvertible {
+    public var stringKey: String { key }
+}
+
+extension KeyPath: StringKeyConvertible where Root: CKRecordWrapper, Value: StringKeyConvertible {
+    public typealias Value = Value.Value
+    public var stringKey: String {
+        Root()[keyPath: self].stringKey
+    }
+}
+
+public extension CKPredicate {
+    private convenience init<V>(_ key: any StringKeyConvertible<V>, _ op: String, _ value: V) {
+        self.init(NSPredicate(format: "%K \(op) %@", argumentArray: [key.stringKey, value]))
+    }
+    
+    static func where2<V>(_ key: any StringKeyConvertible<V>, lessThan value: V) -> CKPredicate where V: Comparable {
+        CKPredicate(key, "<", value)
+    }
+    
+    static func where2<V>(_ key: any StringKeyConvertible<V>, lessThanOrEqualTo value: V) -> CKPredicate where V: Comparable {
+        CKPredicate(key, "<=", value)
+    }
+    
+    static func where2<V>(_ key: any StringKeyConvertible<V>, greaterThan value: V) -> CKPredicate where V: Comparable {
+        CKPredicate(key, ">", value)
+    }
+    
+    static func where2<V>(_ key: any StringKeyConvertible<V>, greaterThanOrEqualTo value: V) -> CKPredicate where V: Comparable {
+        CKPredicate(key, ">=", value)
+    }
+    
+    static func where2<V>(_ key: any StringKeyConvertible<V>, equalTo value: V) -> CKPredicate where V: Equatable {
+        CKPredicate(key, "==", value)
+    }
+    
+    static func where2(_ key: any StringKeyConvertible<CKRecord.Reference?>, equalTo value: CKRecord.ID) -> CKPredicate {
+        CKPredicate(key, "==", CKRecord.Reference(recordID: value, action: .none))
+    }
+    
+    static func where2<V>(_ key: any StringKeyConvertible<V>, notEqualTo value: V) -> CKPredicate where V: Equatable {
+        CKPredicate(key, "!=", value)
+    }
+    
+    static func where2(_ key: any StringKeyConvertible<String>, beginsWith value: String) -> CKPredicate {
+        CKPredicate(key, "BEGINSWITH", value)
+    }
+}

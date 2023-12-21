@@ -16,6 +16,9 @@ final class Person: CKRecordWrapper {
     var name: String?
 }
 
+private let userId = CKRecord.ID(recordName: "_4e9be40733e241d8b1a5c38b5e12122d")
+
+
 final class CKRecordWrapperTests: XCTestCase {
     func testWrap() throws {
         let record = CKRecord(recordType: "Person")
@@ -34,13 +37,33 @@ final class CKRecordWrapperTests: XCTestCase {
     }
     
     func testFieldPredicate() throws {
-        let pred = CKPredicate<Person>.where(\.$name, equalTo: "Jayson")
+        let pred: CKPredicate<Person> =
+            .where(\.$name, equalTo: "Jayson")
         XCTAssertEqual(pred.predicate.predicateFormat, #"name == "Jayson""#)
     }
     
     func testSystemFieldPredicate() throws {
-        let userId = CKRecord.ID(recordName: "_4e9be40733e241d8b1a5c38b5e12122d")
-        let pred = CKPredicate<Person>.where(.creatorUserRecordID, equalTo: userId)
+        let pred: CKPredicate<Person> = 
+            .where(.creatorUserRecordID, equalTo: userId)
         XCTAssertEqual(pred.predicate.predicateFormat, "___createdBy == \(userId)")
+    }
+    
+    func testCompoundPredicate() throws {
+        let pred: CKPredicate<Person> =
+            .where(\.$name, equalTo: "Jayson")
+            .and(.where(.creatorUserRecordID, equalTo: userId))
+        
+        XCTAssertEqual(pred.predicate.predicateFormat, #"name == "Jayson" AND ___createdBy == \#(userId)"#)
+    }
+    
+    // type inference is lost here, that's probably unavoidable
+    func testUnifiedPredicates() throws {
+        let namePred: CKPredicate<Person> =
+            .where2(\Person.$name, equalTo: "Jayson")
+        XCTAssertEqual(namePred.predicate.predicateFormat, #"name == "Jayson""#)
+        
+        let creatorPred: CKPredicate<Person> =
+            .where2(CKRecord.TypedSystemFieldKey.creatorUserRecordID, equalTo: userId)
+        XCTAssertEqual(creatorPred.predicate.predicateFormat, "___createdBy == \(userId)")
     }
 }
